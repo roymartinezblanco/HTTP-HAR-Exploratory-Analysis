@@ -27,6 +27,7 @@ I preferred to run this on a Jupiter Notebook, for simpler use and management bu
 ![Cache Status](/Content/cache-status.png)
 
 ## WHY?
+
 My use for this is, to quickly execute it and get a good idea of what is happening and where to focus/start looking. One example is the following chart, using browser timing data. On it, we see that a couple of domains could benefit from browser hints ([Adaptive Acceleration](https://developer.akamai.com/ion/adaptive-acceleration)) to reduce DNS time along with other of the timings shown.
 
 ![3rd Party Connect Timing](/Content/3rd-connect-timings.png)
@@ -263,7 +264,6 @@ del tmp
 
 ![HTTP Response Codes](/Content/status_codes.png)  
 
-
 ```python
 tmp = dat_clean 
 tmp = tmp.groupby(['status']).size().reset_index(name='Count')
@@ -273,22 +273,6 @@ plt.title('HTTP Response Codes')
 plt.axis('equal')
 plt.tight_layout()
 plt.show()
-```
-
-#### HTTP Status by Domain
-
-![HTTP Status by Domain](/Content/status_by_domain.png)  
-
-```python
-tmp = dat_clean
-tmp = tmp.groupby(['host','status']).size().reset_index(name='Count') 
-tmp = tmp.reset_index().pivot(columns='status', index='host', values='Count')
-tmp.plot.bar();
-plt.title('HTTP Status by Domain')
-plt.xlabel('Count')
-plt.ylabel('Domain')
-plt.show()
-del tmp
 ```
 
 #### HTTP Status by Domain
