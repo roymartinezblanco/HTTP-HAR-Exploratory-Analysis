@@ -12,7 +12,7 @@ What am I doing differently? This time I used Python libraries to provide multip
 
 Libraries used (Pandas):
 
-![Pandas](/img/posts/2020/harexploratory/pandas.jpg)
+![Pandas](/Content/pandas.jpg)
 
 ```python
 import json, os,re
@@ -24,17 +24,17 @@ I preferred to run this on a Jupiter Notebook, for simpler use and management bu
 
 > https://github.com/roymartinezblanco/HTTP-HAR-Exploratory-Analysis/
 
-![Cache Status](/img/posts/2020/harexploratory/cache-status.png)
+![Cache Status](/Content/cache-status.png)
 
 ## WHY?
 My use for this is, to quickly execute it and get a good idea of what is happening and where to focus/start looking. One example is the following chart, using browser timing data. On it, we see that a couple of domains could benefit from browser hints ([Adaptive Acceleration](https://developer.akamai.com/ion/adaptive-acceleration)) to reduce DNS time along with other of the timings shown.
 
-![3rd Party Connect Timing](/img/posts/2020/harexploratory/3rd-connect-timings.png)
+![3rd Party Connect Timing](/Content/3rd-connect-timings.png)
 
 ## First, start by cleaning the data.
 
 This type of export from the browser contains ALOT of data and not all are useful. The idea is to have a dataset like the one shown below that can then be easily worked on.
-![Sample Output](/img/posts/2020/harexploratory/output.png)
+![Sample Output](/Content/output.png)
 
 I did this with two main snippets.
 
@@ -164,7 +164,7 @@ Here are some of the analysis that can be done with this setup and code snippet 
 
 #### 3rd Party Timings
 
-![3rd Party Timings](/img/posts/2020/harexploratory/3rd-connect-timings.png) 
+![3rd Party Timings](/Content/3rd-connect-timings.png) 
 
 ```python
 tmp = dat_clean
@@ -181,7 +181,7 @@ del tmp
 
 #### First vs Third
 
-![First vs Third](/img/posts/2020/harexploratory/pie_first_vs_third.png)  
+![First vs Third](/Content/pie_first_vs_third.png)  
 
 ```python
 tmp = dat_clean
@@ -197,7 +197,7 @@ plt.show()
 
 #### 3rd Connect Timings
 
-![3rd Connect Timings](/img/posts/2020/harexploratory/3rd-connect-timings.png)  
+![3rd Connect Timings](/Content/3rd-connect-timings.png)  
 
 ```python
 tmp = dat_clean
@@ -213,7 +213,7 @@ del tmp
 
 #### HTTP Method by Domain
 
-![HTTP Method by Domain](/img/posts/2020/harexploratory/method_vs_domain.png)  
+![HTTP Method by Domain](/Content/method_vs_domain.png)  
 
 ```python
 tmp = dat_clean
@@ -230,7 +230,7 @@ del tmp
 
 #### Third Party by Requests
 
-![Third Party by Requests](/img/posts/2020/harexploratory/3rd_count.png)  
+![Third Party by Requests](/Content/3rd_count.png)  
 
 ```python
 tmp = dat_clean
@@ -245,7 +245,7 @@ del tmp
 
 #### Third Party by Content Size
 
-![Third Party by Content Size](/img/posts/2020/harexploratory/3d_size.png)  
+![Third Party by Content Size](/Content/3d_size.png)  
 
 ```python
 tmp = dat_clean
@@ -261,7 +261,7 @@ del tmp
 
 #### HTTP Response Codes
 
-![HTTP Response Codes](/img/posts/2020/harexploratory/status_codes.png)  
+![HTTP Response Codes](/Content/status_codes.png)  
 
 
 ```python
@@ -277,7 +277,7 @@ plt.show()
 
 #### HTTP Status by Domain
 
-![HTTP Status by Domain](/img/posts/2020/harexploratory/status_by_domain.png)  
+![HTTP Status by Domain](/Content/status_by_domain.png)  
 
 ```python
 tmp = dat_clean
@@ -293,7 +293,7 @@ del tmp
 
 #### HTTP Status by Domain
 
-![HTTP Status by Domain](/img/posts/2020/harexploratory/status_by_domain.png)  
+![HTTP Status by Domain](/Content/status_by_domain.png)  
 
 ```python
 tmp = dat_clean
@@ -309,7 +309,7 @@ del tmp
 
 #### Extensions by Domain
 
-![Extensions by Domain](/img/posts/2020/harexploratory/ext_by_domain.png)  
+![Extensions by Domain](/Content/ext_by_domain.png)  
 
 ```python
 tmp = dat_clean
@@ -326,7 +326,7 @@ del tmp
 
 #### Timing by Ext
 
-![Timing by Ext](/img/posts/2020/harexploratory/timing_by_ext.png)  
+![Timing by Ext](/Content/timing_by_ext.png)  
 
 ```python
 tmp = dat_clean
@@ -344,7 +344,7 @@ del tmp
 
 #### RO vs Origin
 
-![RO vs Origin](/img/posts/2020/harexploratory/ro_vs_or.png)  
+![RO vs Origin](/Content/ro_vs_or.png)  
 
 ```python
 tmp = dat_clean
@@ -363,7 +363,7 @@ del tmp
 
 #### IM vs Origin
 
-![IM vs Origin](/img/posts/2020/harexploratory/im_vs_or.png)  
+![IM vs Origin](/Content/im_vs_or.png)  
 
 ```python
 tmp = dat_clean
@@ -381,7 +381,7 @@ del tmp
 
 #### Cache Status
 
-![Cache Status](/img/posts/2020/harexploratory/cache_status.png)  
+![Cache Status](/Content/cache_status.png)  
 
 ```python
 tmp = dat_clean 
@@ -398,7 +398,7 @@ del tmp
 
 #### Cache Status by ext
 
-![Cache Status by ext](/img/posts/2020/harexploratory/cache_status_by_ext.png)  
+![Cache Status by ext](/Content/cache_status_by_ext.png)  
 
 ```python
 tmp = dat_clean
@@ -415,7 +415,7 @@ del tmp
 
 #### Edge vs Origin time by Ext
 
-![Edge vs Origin time by Ext](/img/posts/2020/harexploratory/edge_vs_or.png)  
+![Edge vs Origin time by Ext](/Content/edge_vs_or.png)  
 
 ```python
 tmp = dat_clean
