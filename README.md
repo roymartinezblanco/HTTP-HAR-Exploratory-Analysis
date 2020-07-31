@@ -1,6 +1,5 @@
 # HTTP-HAR-Exploratory-Analysis
  
-
 TLDR; How to read a HAR file and make charts out of the curated data. 
 
 ---
@@ -13,30 +12,29 @@ What am I doing differently? This time I used Python libraries to provide multip
 
 Libraries used (Pandas):
 
-![Pandas](/Content/pandas.jpg)
+![Pandas](/img/posts/2020/harexploratory/pandas.jpg)
 
 ```python
 import json, os,re
 import pandas as pd
 import  matplotlib.pyplot as plt
 ```
-∂
+
 I preferred to run this on a Jupiter Notebook, for simpler use and management but you can run this as a script  if you want. (see this for a quick guide if you want to do this too [Jupyter Guide](https://jupyter.org/install)).
 
 > https://github.com/roymartinezblanco/HTTP-HAR-Exploratory-Analysis/
 
-![Cache Status](/Content/cache-status.png)
+![Cache Status](/img/posts/2020/harexploratory/cache-status.png)
 
 ## WHY?
-
 My use for this is, to quickly execute it and get a good idea of what is happening and where to focus/start looking. One example is the following chart, using browser timing data. On it, we see that a couple of domains could benefit from browser hints ([Adaptive Acceleration](https://developer.akamai.com/ion/adaptive-acceleration)) to reduce DNS time along with other of the timings shown.
 
-![3rd Party Connect Timing](/Content/3rd-connect-timings.png)
+![3rd Party Connect Timing](/img/posts/2020/harexploratory/3rd-connect-timings.png)
 
 ## First, start by cleaning the data.
 
 This type of export from the browser contains ALOT of data and not all are useful. The idea is to have a dataset like the one shown below that can then be easily worked on.
-![Sample Output](/Content/output.png)
+![Sample Output](/img/posts/2020/harexploratory/output.png)
 
 I did this with two main snippets.
 
@@ -150,3 +148,286 @@ for r in har['log']['entries']:
         'ttfb':r['timings']['wait'],
         'receive':r['timings']['receive'],
         'edgeTime':findHeader(r,'cdn-timing','edge','eq'),
+        'originTime':findHeader(r,'cdn-timing','origin','eq') 
+        }
+
+    dat_clean = dat_clean.append(new_row,ignore_index=True)
+dat_clean = dat_clean.groupby(colmms).size().reset_index(name='Count')   
+dat_clean.to_csv(directory+'Output/output.csv',index=False)
+```
+
+## Examples
+
+Here are some of the analysis that can be done with this setup and code snippet for each one.
+
+### General
+
+#### 3rd Party Timings
+
+![3rd Party Timings](/img/posts/2020/harexploratory/3rd-connect-timings.png) 
+
+```python
+tmp = dat_clean
+tmp = tmp[tmp['host-type'] == 'Third Party']
+tmp = tmp[["host", "send","ttfb", "receive"]]
+tmp = tmp.groupby('host')[ "send", "ttfb", "receive"].mean().reset_index()
+tmp.plot(x="host", kind="bar", stacked=True,label='Series')
+plt.title('Third Party Timings')
+plt.xlabel('Domains')
+plt.ylabel('Milliseconds')
+plt.show()
+del tmp
+```
+
+#### First vs Third
+
+![First vs Third](/img/posts/2020/harexploratory/pie_first_vs_third.png)  
+
+```python
+tmp = dat_clean
+tmp = tmp.groupby(['host','host-type','url']).size().reset_index(name='Count')
+tmp = tmp.groupby(['host-type']).sum().reset_index()
+tmp = tmp.sort_values(by=['Count'],ascending=False)
+plt.pie(tmp['Count'],labels=tmp['host-type'],shadow=False,autopct='%1.1f%%')
+plt.title('First vs Third Party')
+plt.axis('equal')
+plt.tight_layout()
+plt.show()
+```
+
+#### 3rd Connect Timings
+
+![3rd Connect Timings](/img/posts/2020/harexploratory/3rd-connect-timings.png)  
+
+```python
+tmp = dat_clean
+tmp =  tmp[tmp['host-type'] == 'Third Party']
+tmp = tmp.groupby('host')[ "dns","ssl","connect"].mean().reset_index()
+tmp[["host", "dns","ssl","connect"]].plot(x="host", kind="bar", stacked=True,label='Series')
+plt.title('Third Party Connect Timings')
+plt.xlabel('Domains')
+plt.ylabel('Milliseconds')
+plt.show()
+del tmp
+```
+
+#### HTTP Method by Domain
+
+![HTTP Method by Domain](/img/posts/2020/harexploratory/method_vs_domain.png)  
+
+```python
+tmp = dat_clean
+tmp = tmp[["host","method"]]
+tmp = tmp.groupby(['host','method']).size().reset_index(name='Count') 
+tmp = tmp.reset_index().pivot(columns='method', index='host', values='Count')
+tmp.plot.bar();
+plt.title('Method by Domain')
+plt.xlabel('Domains')
+plt.ylabel('Count')
+plt.show()
+del tmp
+```
+
+#### Third Party by Requests
+
+![Third Party by Requests](/img/posts/2020/harexploratory/3rd_count.png)  
+
+```python
+tmp = dat_clean
+tmp =  tmp[tmp['host-type'] == 'Third Party']
+tmp = tmp.groupby('host').size().reset_index(name='Count').plot(x="host", kind="bar", stacked=True,label='Series')
+plt.title('Third Party by Requests')
+plt.xlabel('Domain')
+plt.ylabel('Requests')
+plt.show()
+del tmp
+```
+
+#### Third Party by Content Size
+
+![Third Party by Content Size](/img/posts/2020/harexploratory/3d_size.png)  
+
+```python
+tmp = dat_clean
+tmp =  tmp[tmp['host-type'] == 'Third Party']
+tmp = tmp.groupby('host')[ "content-length"].mean().reset_index()
+tmp[["host", "content-length"]].plot(x="host", kind="bar", stacked=True,label='Series')
+plt.title('Third Party by Content Size')
+plt.xlabel('Domains')
+plt.ylabel('Content Length')
+plt.show()
+del tmp
+```
+
+#### HTTP Response Codes
+
+![HTTP Response Codes](/img/posts/2020/harexploratory/status_codes.png)  
+
+
+```python
+tmp = dat_clean 
+tmp = tmp.groupby(['status']).size().reset_index(name='Count')
+tmp = tmp.sort_values(by=['Count'],ascending=False)
+plt.pie(tmp['Count'],labels=tmp['status'],shadow=False,autopct='%1.1f%%')
+plt.title('HTTP Response Codes')
+plt.axis('equal')
+plt.tight_layout()
+plt.show()
+```
+
+#### HTTP Status by Domain
+
+![HTTP Status by Domain](/img/posts/2020/harexploratory/status_by_domain.png)  
+
+```python
+tmp = dat_clean
+tmp = tmp.groupby(['host','status']).size().reset_index(name='Count') 
+tmp = tmp.reset_index().pivot(columns='status', index='host', values='Count')
+tmp.plot.bar();
+plt.title('HTTP Status by Domain')
+plt.xlabel('Count')
+plt.ylabel('Domain')
+plt.show()
+del tmp
+```
+
+#### HTTP Status by Domain
+
+![HTTP Status by Domain](/img/posts/2020/harexploratory/status_by_domain.png)  
+
+```python
+tmp = dat_clean
+tmp = tmp.groupby(['host','status']).size().reset_index(name='Count') 
+tmp = tmp.reset_index().pivot(columns='status', index='host', values='Count')
+tmp.plot.bar();
+plt.title('HTTP Status by Domain')
+plt.xlabel('Count')
+plt.ylabel('Domain')
+plt.show()
+del tmp
+```
+
+#### Extensions by Domain
+
+![Extensions by Domain](/img/posts/2020/harexploratory/ext_by_domain.png)  
+
+```python
+tmp = dat_clean
+tmp =  tmp[tmp['host-type'] == 'First Party']
+tmp = tmp.groupby(['host','ext']).size().reset_index(name='Count') 
+tmp = tmp.reset_index().pivot(columns='ext', index='host', values='Count')
+tmp.plot.bar();
+plt.title('Extensions by Domain')
+plt.xlabel('Domain/Ext')
+plt.ylabel('Count')
+plt.show()
+del tmp 
+```
+
+#### Timing by Ext
+
+![Timing by Ext](/img/posts/2020/harexploratory/timing_by_ext.png)  
+
+```python
+tmp = dat_clean
+tmp =  tmp[tmp['host'] == domain]
+tmp = tmp.groupby('ext')[ "send", "ttfb", "receive"].mean().reset_index()
+tmp[["ext", "send", "ttfb", "receive"]].plot(x="ext", kind="bar", stacked=True,label='Series')
+plt.title(domain+': Timing by Ext')
+plt.xlabel('Extensions')
+plt.ylabel('Milliseconds')
+plt.show()
+del tmp  
+```
+
+### Akamai Specific
+
+#### RO vs Origin
+
+![RO vs Origin](/img/posts/2020/harexploratory/ro_vs_or.png)  
+
+```python
+tmp = dat_clean
+tmp = tmp[tmp['host-type'] == 'First Party']
+tmp = tmp[tmp['ext'].isin(['css','js'])]
+tmp = tmp[["ext", "content-length","content-length-origin"]]
+tmp = tmp.groupby('ext')["content-length","content-length-origin"].mean().reset_index()
+tmp.plot(x="ext", kind="bar",label=['RO','RAW'])
+plt.title('First Party Resource Optimizer content-length vs Origin')
+plt.xlabel('Extensions')
+plt.ylabel('Bytes')
+plt.legend(["RO", "Origin"]);
+plt.show()
+del tmp
+```
+
+#### IM vs Origin
+
+![IM vs Origin](/img/posts/2020/harexploratory/im_vs_or.png)  
+
+```python
+tmp = dat_clean
+tmp = tmp[tmp['host-type'] == 'First Party']
+tmp = tmp[tmp['ext'].isin(['jpg','png'])]
+tmp = tmp.groupby('ext')["content-length","content-length-origin"].mean().reset_index()
+tmp[["ext", "content-length","content-length-origin"]].plot(x="ext", kind="bar",label=['RO','RAW'])
+plt.title('First Party Image Manager content-length vs Origin')
+plt.xlabel('Extensions')
+plt.ylabel('Bytes')
+plt.legend(["IM", "Origin"]);
+plt.show()
+del tmp
+```
+
+#### Cache Status
+
+![Cache Status](/img/posts/2020/harexploratory/cache_status.png)  
+
+```python
+tmp = dat_clean 
+tmp =  tmp[tmp['host'] == domain]
+tmp = tmp.groupby(['cdn-cache']).size().reset_index(name='Count')
+plt.pie(tmp['Count'],shadow=False,autopct='%1.1f%%')
+plt.legend( tmp['cdn-cache'], loc="best")
+plt.title('Cache Status')
+plt.axis('equal')
+plt.tight_layout()
+plt.show()
+del tmp  
+```
+
+#### Cache Status by ext
+
+![Cache Status by ext](/img/posts/2020/harexploratory/cache_status_by_ext.png)  
+
+```python
+tmp = dat_clean
+tmp =  tmp[tmp['host'] == domain]
+tmp = tmp.groupby(['cdn-cache','ext']).size().reset_index(name='Count') 
+tmp = tmp.reset_index().pivot(columns='ext', index='cdn-cache', values='Count')
+tmp.plot.bar();
+plt.title('Cache Status by ext')
+plt.xlabel('Domain/Ext')
+plt.ylabel('Count')
+plt.show()
+del tmp 
+```
+
+#### Edge vs Origin time by Ext
+
+![Edge vs Origin time by Ext](/img/posts/2020/harexploratory/edge_vs_or.png)  
+
+```python
+tmp = dat_clean
+tmp =  tmp[tmp['host'] == domain]
+tmp = tmp.groupby('ext')[ "edgeTime", "originTime"].mean().reset_index()
+tmp[["ext", "edgeTime", "originTime"]].plot(x="ext", kind="bar", stacked=True,label='Series')
+plt.title(domain+': Edge vs Origin time by Ext')
+plt.xlabel('Extensions')
+plt.ylabel('Milliseconds')
+plt.show()
+del tmp  
+```
+
+
+## Have fun!...
